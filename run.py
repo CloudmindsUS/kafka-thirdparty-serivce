@@ -26,18 +26,19 @@ import requests
 day_record = datetime.now()-dt.timedelta(hours = 8)
 time_zone = {'Pacific':8, 'Mountain':7, 'Central':6, 'Eastern':5}
 
+consumer = KafkaConsumer(bootstrap_servers=[config.server_ip])
+consumer.subscribe(topics=(config.kafka_topic)) 
+print (consumer.subscription())
+print (consumer.assignment())
+
 # For Initialization Kafka and Removing Temp Image
-def create_consumer():
-    consumer = KafkaConsumer(bootstrap_servers=[config.server_ip])
-    consumer.subscribe(topics=(config.kafka_topic)) 
-    print (consumer.subscription())
-    print (consumer.assignment())
+def init():
     if os.path.exists('temp.jpg'):
         os.remove('temp.jpg')
-    return consumer
+    return
 
 # Main Loop
-def loop_forever(consumer):
+def loop_forever():
     time_history = {}
     while True:
         msg = consumer.poll(timeout_ms=1000) 
@@ -214,5 +215,5 @@ if __name__ == "__main__":
                     filemode='a',
                     format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'
                     )
-    consumer = create_consumer()
-    loop_forever(consumer)
+    init()
+    loop_forever()
