@@ -1,7 +1,3 @@
-﻿Device_Name,IMEI,Device_ID,Name1,contact1,Name2,contact2,Name3,contact3,threshold,interval,TimeZone 
-CloudMinds-1,862851030092681,0,,,,,,,,,
-CloudMinds-2,862851030093481,0,,,,,,,,,
-CloudMinds-3,862851030095353,c000000000a3,Ralph,8142515110,,,,,105,8,Pacific
-Test-1,862851030092681,0,,,,,,,99.2,8,Pacific
-Test-2,862851030084647,c000000000a2,,,,,,,99.2,8,Pacific
+﻿Device_Name,IMEI,Device_ID,Name1,contact1,Name2,contact2,Name3,contact3,threshold,interval,TimeZone
+Sample,862851030094257,0,Ralph,8142515110,,,,,97,5,Pacific
 Sample,8628510300xxxxx,0,NameA,,NameB,,NameC,,99.2,5,Eastern
