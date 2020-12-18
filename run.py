@@ -51,7 +51,7 @@ def loop_once(msg, time_history, day_record, time_zone):
             continue
         process_each_data(tmp, df, time_history, day_record, time_zone, each)
 
-def send_iot_payload(tmp, eui):
+def send_iot_payload(tmp, eui, curr_device):
     data_iot = {
         'eui': eui,
         'format': 'json',
@@ -155,7 +155,7 @@ def process_each_data(tmp, df, time_history, day_record, time_zone, each):
     eui = df['Device_ID'][curr_device]
 
     if eui != '0':
-        send_iot_payload(tmp,eui)
+        send_iot_payload(tmp,eui,curr_device)
 
 
     account_sid = 'ACcfc2242432d092ac2e7f568f2599218b'
