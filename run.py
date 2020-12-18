@@ -49,7 +49,7 @@ def loop_once(msg, time_history, day_record, time_zone):
         if curr_device not in device_list:
             logging.warn('No corresponding account with IMEI: ' + tmp.get('device_id'))
             continue
-        process_each_data(tmp, df, time_history, day_record, time_zone)
+        process_each_data(tmp, df, time_history, day_record, time_zone, each)
 
 def send_iot_payload():
     data_iot = {
@@ -78,7 +78,7 @@ def send_iot_payload():
     print(r, data_iot)
     logging.info(data_iot)
 
-def process_each_data(tmp, df, time_history, day_record, time_zone):
+def process_each_data(tmp, df, time_history, day_record, time_zone, each):
     curr_device = tmp.get('device_id')
     device_list = df.index.values.tolist()
 
