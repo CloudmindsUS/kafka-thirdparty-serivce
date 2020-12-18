@@ -22,35 +22,14 @@ import os
 from urllib import request
 import requests
 
-# Global Variable for day tracking
-day_record = datetime.now()-dt.timedelta(hours = 8)
-time_zone = {'Pacific':8, 'Mountain':7, 'Central':6, 'Eastern':5}
-
-consumer = KafkaConsumer(bootstrap_servers=[config.server_ip])
-consumer.subscribe(topics=(config.kafka_topic)) 
-print (consumer.subscription())
-print (consumer.assignment())
-
 # For Initialization Kafka and Removing Temp Image
 def init():
     if os.path.exists('temp.jpg'):
         os.remove('temp.jpg')
     return
 
-# Main Loop
-def loop_forever():
-    time_history = {}
-    while True:
-        msg = consumer.poll(timeout_ms=1000) 
-        if not bool(msg):
-            time.sleep(1)
-            print('-')
-            continue
-        loop_once(msg)
-
 # Singe Loop
-def loop_once(consumer):
-    msg = consumer.poll(timeout_ms=1000) 
+def loop_once(msg, time_history, day_record, time_zone):
 
     logging.info(msg)    
     df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'], index_col='IMEI')
@@ -70,7 +49,7 @@ def loop_once(consumer):
         if curr_device not in device_list:
             logging.warn('No corresponding account with IMEI: ' + tmp.get('device_id'))
             continue
-        process_each_data(tmp,df)
+        process_each_data(tmp, df, time_history, day_record, time_zone)
 
 def send_iot_payload():
     data_iot = {
@@ -99,7 +78,7 @@ def send_iot_payload():
     print(r, data_iot)
     logging.info(data_iot)
 
-def process_each_data(tmp,df):
+def process_each_data(tmp, df, time_history, day_record, time_zone):
     curr_device = tmp.get('device_id')
     device_list = df.index.values.tolist()
 
@@ -217,8 +196,17 @@ if __name__ == "__main__":
                     )
     consumer = KafkaConsumer(bootstrap_servers=[config.server_ip])
     consumer.subscribe(topics=(config.kafka_topic)) 
+    day_record = datetime.now()-dt.timedelta(hours = 8)
+    time_zone = {'Pacific':8, 'Mountain':7, 'Central':6, 'Eastern':5}
     print (consumer.subscription())
     print (consumer.assignment())
-    print (type(consumer))
+
     init()
-    loop_forever()
+    time_history = {}
+    while True:
+        msg = consumer.poll(timeout_ms=1000) 
+        if not bool(msg):
+            time.sleep(1)
+            print('-')
+            continue
+        loop_once(msg, time_history, day_record, time_zone)
