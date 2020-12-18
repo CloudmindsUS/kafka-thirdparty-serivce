@@ -19,7 +19,8 @@ import face_recognition
 from face_recognition import load_image_file, face_encodings, compare_faces
 
 import os
-import urllib.request
+from urllib import request
+import requests
 
 # Global Variable for day tracking
 day_record = datetime.now()-dt.timedelta(hours = 8)
@@ -113,7 +114,7 @@ def process_each_data(tmp,df):
     if os.path.exists('temp.jpg'):
         os.remove('temp.jpg')
 
-    urllib.request.urlretrieve(tmp.get('face_url'), 'temp.jpg')
+    request.urlretrieve(tmp.get('face_url'), 'temp.jpg')
     
 
     if curr_device not in time_history:
