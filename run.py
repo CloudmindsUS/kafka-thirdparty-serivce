@@ -51,7 +51,7 @@ def loop_once(msg, time_history, day_record, time_zone):
             continue
         process_each_data(tmp, df, time_history, day_record, time_zone, each)
 
-def send_iot_payload():
+def send_iot_payload(tmp, eui):
     data_iot = {
         'eui': eui,
         'format': 'json',
