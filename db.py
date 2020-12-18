@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy_utils import database_exists, create_database, table_exists
+from sqlalchemy_utils import database_exists, create_database
 import pandas as pd
 
 engine = create_engine('mysql://root:123qwe@localhost/contacts',echo=False)
