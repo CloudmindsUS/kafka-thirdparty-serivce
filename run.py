@@ -215,5 +215,10 @@ if __name__ == "__main__":
                     filemode='a',
                     format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'
                     )
+    consumer = KafkaConsumer(bootstrap_servers=[config.server_ip])
+    consumer.subscribe(topics=(config.kafka_topic)) 
+    print (consumer.subscription())
+    print (consumer.assignment())
+    print (type(consumer))
     init()
     loop_forever()
