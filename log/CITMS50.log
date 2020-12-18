@@ -1,3 +1,9 @@
 2020-12-18 12:38:06,851 - C:\Users\ralph\Anaconda3\lib\site-packages\kafka\conn.py[line:354] - ERROR: Connection attempt to <BrokerConnection node_id=bootstrap host=10.128.0.254/10.128.0.254 port=32483> timed out
 2020-12-18 12:38:06,852 - C:\Users\ralph\Anaconda3\lib\site-packages\kafka\client_async.py[line:275] - ERROR: Unable to bootstrap from [('10.128.0.254', 32483, <AddressFamily.AF_INET: 2>)]
 2020-12-18 21:07:18,951 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-18 21:19:26,134 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-18 21:26:42,658 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-18 21:28:11,383 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-18 21:29:01,554 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-18 21:32:29,847 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-18 21:34:11,161 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.

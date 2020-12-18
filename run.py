@@ -154,7 +154,7 @@ def process_each_data(tmp, df, time_history, day_record, time_zone, each):
 
     eui = df['Device_ID'][curr_device]
 
-    if eui != '0':
+    if eui != '0' and eui != 0:
         send_iot_payload(tmp,eui,curr_device)
 
 
