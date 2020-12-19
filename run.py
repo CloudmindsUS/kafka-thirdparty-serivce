@@ -21,18 +21,28 @@ from face_recognition import load_image_file, face_encodings, compare_faces
 import os
 from urllib import request
 import requests
+from sqlalchemy import create_engine
+from sqlalchemy_utils import database_exists, create_database
 
 # For Initialization Kafka and Removing Temp Image
 def init():
     if os.path.exists('temp.jpg'):
         os.remove('temp.jpg')
-    return
+    engine = create_engine('mysql://root:111111@localhost/contacts',echo=False)
+    if not database_exists(engine.url):
+        create_database(engine.url)
+    df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'])
+    df.to_sql('infos',if_exists='replace',con=engine)
+
+    return engine
 
 # Singe Loop
 def loop_once(msg, time_history, day_record, time_zone):
 
-    logging.info(msg)    
-    df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'], index_col='IMEI')
+    logging.info(msg)
+    df = pd.read_sql_table('infos','mysql://root:111111@localhost/contacts', index_col = 'Device_Name')
+    df = df.drop(columns=['index'])    
+    #df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'], index_col='IMEI')
 
     curr_date = datetime.now()-dt.timedelta(hours = 8)
     if day_record.day != curr_date.day or day_record.month != curr_date.month:
