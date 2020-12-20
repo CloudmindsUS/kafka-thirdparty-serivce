@@ -7,3 +7,5 @@
 2020-12-18 21:29:01,554 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
 2020-12-18 21:32:29,847 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
 2020-12-18 21:34:11,161 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:01:14,696 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:08:39,358 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
