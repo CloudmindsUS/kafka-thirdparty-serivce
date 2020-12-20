@@ -33,7 +33,10 @@ def init():
         create_database(engine.url)
     df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'])
     df.to_sql('infos',if_exists='replace',con=engine)
-    print(df)    
+    print(df)
+    df_new = pd.read_sql_table('infos','mysql://root:111111@localhost/contacts', index_col = 'Device_Name')
+    df_new = df_new.drop(columns=['index'])     
+    print(df_new)
 
     return
 
