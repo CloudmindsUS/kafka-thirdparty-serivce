@@ -34,7 +34,7 @@ def init():
     df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'])
     df.to_sql('infos',if_exists='replace',con=engine)
     print(df)
-    df_new = pd.read_sql_table('infos','mysql://root:111111@localhost/contacts', index_col = 'Device_Name')
+    df_new = pd.read_sql_table('infos','mysql://root:111111@localhost/contacts', index_col = 'IMEI')
     df_new = df_new.drop(columns=['index'])     
     print(df_new)
 
@@ -44,7 +44,8 @@ def init():
 def loop_once(msg, time_history, day_record, time_zone):
 
     logging.info(msg)
-    df = pd.read_sql_table('infos','mysql://root:111111@localhost/contacts', index_col = 'Device_Name')
+    print(msg)
+    df = pd.read_sql_table('infos','mysql://root:111111@localhost/contacts', index_col = 'IMEI')
     df = df.drop(columns=['index'])    
     #df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'], index_col='IMEI')
     
@@ -57,13 +58,14 @@ def loop_once(msg, time_history, day_record, time_zone):
     
     for each in all_data:    
         tmp = eval(each.value)
-        curr_device = tmp.get('device_id')
+        curr_device = str(tmp.get('device_id'))
         device_list = df.index.values.tolist()
+        print(type(curr_device), device_list)
 
         if curr_device not in device_list:
             logging.warn('No corresponding account with IMEI: ' + tmp.get('device_id'))
             continue
-        process_each_data(tmp, df, time_history, day_record, time_zone, each)
+        process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_device)
 
 def send_iot_payload(tmp, eui, curr_device):
     data_iot = {
@@ -92,12 +94,7 @@ def send_iot_payload(tmp, eui, curr_device):
     print(r, data_iot)
     logging.info(data_iot)
 
-def process_each_data(tmp, df, time_history, day_record, time_zone, each):
-    curr_device = tmp.get('device_id')
-    device_list = df.index.values.tolist()
-
-    if curr_device not in device_list:
-        return
+def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_device):
     
     interval = 8000
     if math.isnan(df['interval'][curr_device]):

@@ -9,3 +9,26 @@
 2020-12-18 21:34:11,161 - /usr/local/lib/python3.5/dist-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
 2020-12-20 00:01:14,696 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
 2020-12-20 00:08:39,358 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:14:42,463 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:17:28,778 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:18:11,130 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:19:25,591 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:19:31,129 - run.py[line:65] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:19:32,011 - run.py[line:65] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:19:34,037 - run.py[line:65] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:19:34,829 - run.py[line:65] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:19:36,856 - run.py[line:65] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:19:38,880 - run.py[line:65] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:19:38,880 - run.py[line:65] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:20:43,234 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:20:47,803 - run.py[line:66] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:20:48,206 - run.py[line:66] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:20:48,798 - run.py[line:66] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:20:52,825 - run.py[line:66] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:20:55,259 - run.py[line:66] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:20:59,462 - run.py[line:66] - WARNING: No corresponding account with IMEI: 862851030094257
+2020-12-20 00:23:38,010 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:24:44,679 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:26:01,132 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:26:47,708 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
+2020-12-20 00:28:20,709 - /home/sara_hu/.local/lib/python3.6/site-packages/kafka/coordinator/consumer.py[line:104] - WARNING: group_id is None: disabling auto-commit.
