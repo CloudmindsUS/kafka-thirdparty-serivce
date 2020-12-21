@@ -28,13 +28,13 @@ from sqlalchemy_utils import database_exists, create_database
 def init():
     if os.path.exists('temp.jpg'):
         os.remove('temp.jpg')
-    engine = create_engine('mysql://root:cloud1688@kafka-thirdparty-mysql:3306/contacts',echo=False)
+    engine = create_engine(config.mysql_conf,echo=False)
     if not database_exists(engine.url):
         create_database(engine.url)
-    df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'])
+    df = pd.read_csv('database.csv', delimiter=',', skiprows=1, names=['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'])
     df.to_sql('infos',if_exists='replace',con=engine)
     print(df)
-    df_new = pd.read_sql_table('infos','mysql://root:cloud1688@kafka-thirdparty-mysql:3306/contacts', index_col = 'IMEI')
+    df_new = pd.read_sql_table('infos',config.mysql_conf, index_col='IMEI')
     df_new = df_new.drop(columns=['index'])     
     print(df_new)
 
@@ -45,7 +45,7 @@ def loop_once(msg, time_history, day_record, time_zone):
 
     logging.info(msg)
     print(msg)
-    df = pd.read_sql_table('infos','mysql://root:cloud1688@kafka-thirdparty-mysql:3306/contacts', index_col = 'IMEI')
+    df = pd.read_sql_table('infos', config.mysql_conf, index_col='IMEI')
     df = df.drop(columns=['index'])    
     #df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'], index_col='IMEI')
     
