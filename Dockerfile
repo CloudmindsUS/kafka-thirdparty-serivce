@@ -9,7 +9,7 @@ COPY requirements.txt .
 
 # install dependencies
 RUN apt-get update -y \
-    && apt-get -y install cmake
+    && apt-get -y install cmake \
 	&& pip install -r requirements.txt
 
 # copy the content of the local src directory to the working directory
