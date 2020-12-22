@@ -1,5 +1,5 @@
 # Harix
-server_ip = 'hari-kafka.harix-kafka-v3.svc:9092'
+server_ip = 'harix-kafka.harix-kafka-v3.svc:9092'
 kafka_topic = 'detect_record'
 
 
