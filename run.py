@@ -88,7 +88,7 @@ def send_iot_payload(tmp, eui, curr_device):
                 ]        
             }
         }
-    r = requests.post(url = "https://lora.iotinabox.com/v1/networks/iotinabox/uplink",data=json.dumps(data_iot))
+    r = requests.post(url = config.mydevices_url, data=json.dumps(data_iot))
     print(r, data_iot)
 
 
@@ -150,7 +150,7 @@ def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_d
                 print('result not ok', time_history[curr_device][2])
                 time_history[curr_device] = [now_e[0], each.timestamp, count]
 
-    if tmp.get('temperature')*1.8+32 < 95 or tmp.get('temperature')*1.8+32 > 105:
+    if tmp.get('temperature')*1.8+32 < config.lower_bound or tmp.get('temperature')*1.8+32 > config.upper_bound:
         return
 
     thres = float(df['threshold'][curr_device])
