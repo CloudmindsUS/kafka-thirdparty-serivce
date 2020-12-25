@@ -4,8 +4,8 @@ kafka_topic = 'detect_record'
 mysql_conf = 'mysql://root:cloud1688@kafka-thirdparty-mysql:3306/contacts'
 
 # twilio
-account_sid = 'ACcfc2242432d092ac2e7f568f2599218b'
-auth_token = 'a32f2f23cd43a7d83af11b6d6b24575e'
+account_sid = 'AC61389296221b860447ed00967abf77b5'
+auth_token = 'd065d9e4f4bb0940722f8dc1a81801c2'
 
 # temp_boundaries
 lower_bound = 95
