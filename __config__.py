@@ -1,7 +1,23 @@
+<<<<<<< HEAD
 # Harix
 server_ip = 'harix-kafka.harix-kafka-v3.svc:9092'
+=======
+# gke-us-prod
+server_ip = 'hari-kafka.harix-kafka-v3.svc:9092'
+>>>>>>> dev
 kafka_topic = 'detect_record'
+mysql_conf = 'mysql://root:cloud1688@kafka-thirdparty-mysql:3306/contacts'
 
+# twilio
+account_sid = 'AC61389296221b860447ed00967abf77b5'
+auth_token = 'd065d9e4f4bb0940722f8dc1a81801c2'
+
+# temp_boundaries
+lower_bound = 95
+upper_bound = 105
+
+# Mydevices IOTinabox
+mydevices_url = "https://lora.iotinabox.com/v1/networks/iotinabox/uplink"
 
 # Third-party cloud
 

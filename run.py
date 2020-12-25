@@ -5,7 +5,6 @@ from kafka import KafkaConsumer
 from kafka import TopicPartition
 import json
 import time
-import logging
 import requests
 import base64
 from twilio.rest import Client
@@ -28,13 +27,13 @@ from sqlalchemy_utils import database_exists, create_database
 def init():
     if os.path.exists('temp.jpg'):
         os.remove('temp.jpg')
-    engine = create_engine('mysql://root:cloud1688@kafka-thirdparty-mysql:3306/contacts',echo=False)
+    engine = create_engine(config.mysql_conf,echo=False)
     if not database_exists(engine.url):
         create_database(engine.url)
-    df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'])
+    df = pd.read_csv('database.csv', delimiter=',', skiprows=1, names=['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'])
     df.to_sql('infos',if_exists='replace',con=engine)
     print(df)
-    df_new = pd.read_sql_table('infos','mysql://root:cloud1688@kafka-thirdparty-mysql:3306/contacts', index_col = 'IMEI')
+    df_new = pd.read_sql_table('infos',config.mysql_conf, index_col='IMEI')
     df_new = df_new.drop(columns=['index'])     
     print(df_new)
 
@@ -43,9 +42,8 @@ def init():
 # Singe Loop
 def loop_once(msg, time_history, day_record, time_zone):
 
-    logging.info(msg)
     print(msg)
-    df = pd.read_sql_table('infos','mysql://root:cloud1688@kafka-thirdparty-mysql:3306/contacts', index_col = 'IMEI')
+    df = pd.read_sql_table('infos', config.mysql_conf, index_col='IMEI')
     df = df.drop(columns=['index'])    
     #df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'], index_col='IMEI')
     
@@ -54,7 +52,7 @@ def loop_once(msg, time_history, day_record, time_zone):
         time_history = {}
         day_record = curr_date
         
-    all_data = msg.get(TopicPartition(topic=u'detect_record', partition=0))
+    all_data = sum(msg.values(), [])
     
     for each in all_data:    
         tmp = eval(each.value)
@@ -63,7 +61,7 @@ def loop_once(msg, time_history, day_record, time_zone):
         print(type(curr_device), device_list)
 
         if curr_device not in device_list:
-            logging.warn('No corresponding account with IMEI: ' + tmp.get('device_id'))
+            print('No corresponding account with IMEI: ' + tmp.get('device_id'))
             continue
         process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_device)
 
@@ -90,9 +88,9 @@ def send_iot_payload(tmp, eui, curr_device):
                 ]        
             }
         }
-    r = requests.post(url = "https://lora.iotinabox.com/v1/networks/iotinabox/uplink",data=json.dumps(data_iot))
+    r = requests.post(url = config.mydevices_url, data=json.dumps(data_iot))
     print(r, data_iot)
-    logging.info(data_iot)
+
 
 def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_device):
     
@@ -152,7 +150,7 @@ def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_d
                 print('result not ok', time_history[curr_device][2])
                 time_history[curr_device] = [now_e[0], each.timestamp, count]
 
-    if tmp.get('temperature')*1.8+32 < 95 or tmp.get('temperature')*1.8+32 > 105:
+    if tmp.get('temperature')*1.8+32 < config.lower_bound or tmp.get('temperature')*1.8+32 > config.upper_bound:
         return
 
     thres = float(df['threshold'][curr_device])
@@ -168,10 +166,7 @@ def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_d
     if eui != '0' and eui != 0:
         send_iot_payload(tmp,eui,curr_device)
 
-
-    account_sid = 'ACcfc2242432d092ac2e7f568f2599218b'
-    auth_token = 'a32f2f23cd43a7d83af11b6d6b24575e'
-    client = Client(account_sid, auth_token)
+    client = Client(config.account_sid, config.auth_token)
 
     if float(tmp.get('temperature'))*1.8+32> thres:
         contacts = []
@@ -197,16 +192,12 @@ def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_d
                     to='+1'+str(contact[0])
                     )
             print(message.sid, contact, msg_body)
-            logging.info(message)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.WARNING,
-                    filename='log/CITMS50.log',
-                    filemode='a',
-                    format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'
-                    )
     consumer = KafkaConsumer(bootstrap_servers=[config.server_ip])
-    consumer.subscribe(topics=(config.kafka_topic)) 
+    topics = list(consumer.topics())
+    valid_topics = [topic for topic in topics if topic[:13]=='detect_record']
+    consumer.subscribe(valid_topics)
     day_record = datetime.now()-dt.timedelta(hours = 8)
     time_zone = {'Pacific':8, 'Mountain':7, 'Central':6, 'Eastern':5}
     print (consumer.subscription())
@@ -218,6 +209,5 @@ if __name__ == "__main__":
         msg = consumer.poll(timeout_ms=1000) 
         if not bool(msg):
             time.sleep(1)
-            print('-')
             continue
         loop_once(msg, time_history, day_record, time_zone)
