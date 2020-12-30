@@ -74,7 +74,7 @@ def send_iot_payload(tmp, eui, curr_device):
                 [
                     {
                         "channel":1,
-                        "value":tmp.get('temperature')*1.8+32,
+                        "value":tmp.get('f_temperature'),
                         "type": "temp",
                         "unit": "f",
                         "name": "Wright Gatekeeper"
@@ -105,52 +105,65 @@ def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_d
 
     request.urlretrieve(tmp.get('face_url'), 'temp.jpg')
     
-
-    if curr_device not in time_history:
-        print('not in time history')
-        tmp_o = load_image_file('temp.jpg');
-        tmp_e = face_encodings(tmp_o);
-        if tmp_e != []:
-            time_history[curr_device] = [tmp_e[0], each.timestamp, 1]
-            result = True
+    if tmp.get('mask') == 1:
+        if curr_device not in time_history:
+            time_history[curr_device] = [None, each.timestamp, 1]
         else:
-            return
+            if each.timestamp - time_history[curr_device][1]>interval:
+                time_history[curr_device] = [None, each.timestamp, time_history[curr_device][2]+1]
+            else:
+                return
+                
+        
     else:
-        print('in time history')
-        if each.timestamp - time_history[curr_device][1]>interval:
+        if curr_device not in time_history:
+            print('not in time history')
+            request.urlretrieve(tmp.get('face_url'), 'temp.jpg')
             tmp_o = load_image_file('temp.jpg');
             tmp_e = face_encodings(tmp_o);
-            count = time_history[curr_device][2]
             if tmp_e != []:
-                time_history[curr_device] = [tmp_e[0], each.timestamp, count+1]
+                time_history[curr_device] = [tmp_e[0], each.timestamp, 1]
                 result = True
             else:
                 return
-        else:    
-            prev_e = time_history[curr_device][0]
-            now = load_image_file('temp.jpg');
-            now_e = face_encodings(now);
-            if now_e == []:
-                return
-            try:
-                result = compare_faces([prev_e], now_e[0])[0];
-                result = bool(result)
-                print(result)
-            except:
-                print(len(now_e),len(prev_e))
-                print('exception')
-                result = True
-            
-            if result == True:
-                print('result ok', time_history[curr_device][2])
-                time_history[curr_device][1] = each.timestamp
-                return
-            else:
-                count = time_history[curr_device][2]+1
-                print('result not ok', time_history[curr_device][2])
-                time_history[curr_device] = [now_e[0], each.timestamp, count]
+        else:
+            print('in time history')
+            if each.timestamp - time_history[curr_device][1]>interval:
+                request.urlretrieve(tmp.get('face_url'), 'temp.jpg')
+                tmp_o = load_image_file('temp.jpg');
+                tmp_e = face_encodings(tmp_o);
+                count = time_history[curr_device][2]
+                if tmp_e != []:
+                    time_history[curr_device] = [tmp_e[0], each.timestamp, count+1]
+                    result = True
+                else:
+                    return
+            else:    
+                prev_e = time_history[curr_device][0]
+                request.urlretrieve(tmp.get('face_url'), 'temp.jpg')
+                now = load_image_file('temp.jpg');
+                now_e = face_encodings(now);
+                if now_e == []:
+                    return
+                try:
+                    result = compare_faces([prev_e], now_e[0])[0];
+                    result = bool(result)
+                    print(result)
+                except:
+                    print(len(now_e),len(prev_e))
+                    print('exception')
+                    result = True
+                
+                if result == True:
+                    print('result ok', time_history[curr_device][2])
+                    time_history[curr_device][1] = each.timestamp
+                    return
+                else:
+                    count = time_history[curr_device][2]+1
+                    print('result not ok', time_history[curr_device][2])
+                    time_history[curr_device] = [now_e[0], each.timestamp, count]
 
-    if tmp.get('temperature')*1.8+32 < config.lower_bound or tmp.get('temperature')*1.8+32 > config.upper_bound:
+    if tmp.get('f_temperature') < config.lower_bound or tmp.get('f_temperature') > config.upper_bound:
         return
 
     thres = float(df['threshold'][curr_device])
@@ -168,7 +181,7 @@ def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_d
 
     client = Client(config.account_sid, config.auth_token)
 
-    if float(tmp.get('temperature'))*1.8+32> thres:
+    if tmp.get('f_temperature')> thres:
         contacts = []
         name1 = df['Name1'][curr_device]
         name2 = df['Name2'][curr_device]
@@ -182,10 +195,16 @@ def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_d
             contacts.append([int(contact2),name2])
         if contact3 is not None and math.isnan(contact3) is False:
             contacts.append([int(contact3),name3])
+        if tmp.get('mask') == 1:
+            substring = 'with mask'
+        else:
+            substring = 'without mask'
         for contact in contacts:
             dt_now = datetime.now()-dt.timedelta(hours=time_zone[tz])
-            msg_body = 'Hi ' + contact[1] + ', Your Gatekeeper Device ending in ' + tmp.get('device_id')[-5:] + ' has detected a High Temperature of ' + str(tmp.get('temperature')*1.8+32) + ' F at ' + datetime.strftime(dt_now, '%Y-%m-%d %H:%M:%S') + '. Device ID: ' + tmp.get('device_id')
-
+            if tmp.get('name') == '':
+                msg_body = 'Hi ' + contact[1] + ', Your Gatekeeper Device ending in ' + tmp.get('device_id')[-5:] + ' has detected a High Temperature of ' + str(tmp.get('f_temperature')) + ' F ' + substring + ' at ' + datetime.strftime(dt_now, '%Y-%m-%d %H:%M:%S') + '. Device ID: ' + tmp.get('device_id')
+            else:
+                msg_body = 'Hi, ' + tmp.get('name') + ' has a High Temperature of ' + str(tmp.get('f_temperature')) + ' F ' + substring + ' at ' + datetime.strftime(dt_now, '%Y-%m-%d %H:%M:%S') + '. Device ID: ' + tmp.get('device_id')
             message = client.messages.create(
                     body=msg_body,
                     from_='+16066209564',
