@@ -1,3 +1,5 @@
 ﻿Device_Name,IMEI,Device_ID,Name1,contact1,Name2,contact2,Name3,contact3,threshold,interval,TimeZone
 Sample,862851030094257,0,Ralph,8142515110,,,,,97,5,Pacific
 Sample,8628510300xxxxx,0,NameA,,NameB,,NameC,,99.2,5,Eastern
+Sample,862851030093333,0,Brad,4097819271,Sonja,8326554083,Marietta,832432612,97,5,Central
+Sample,862851030092962,0,XinLi,8572308278,,,,,98,5,Pacific
