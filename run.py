@@ -14,9 +14,6 @@ import __config__ as config
 from datetime import datetime
 import datetime as dt
 
-import face_recognition
-from face_recognition import load_image_file, face_encodings, compare_faces
-
 import os
 from urllib import request
 import requests
@@ -25,8 +22,6 @@ from sqlalchemy_utils import database_exists, create_database
 
 # For Initialization Kafka and Removing Temp Image
 def init():
-    if os.path.exists('temp.jpg'):
-        os.remove('temp.jpg')
     engine = create_engine(config.mysql_conf,echo=False)
     if not database_exists(engine.url):
         create_database(engine.url)
@@ -40,17 +35,12 @@ def init():
     return
 
 # Singe Loop
-def loop_once(msg, time_history, day_record, time_zone):
+def loop_once(msg, time_zone):
 
     print(msg)
     df = pd.read_sql_table('infos', config.mysql_conf, index_col='IMEI')
     df = df.drop(columns=['index'])    
     #df = pd.read_csv('database.csv', delimiter = ',', skiprows=1, names = ['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3', 'threshold', 'interval', 'TimeZone'], index_col='IMEI')
-    
-    curr_date = datetime.now()-dt.timedelta(hours = 8)
-    if day_record.day != curr_date.day or day_record.month != curr_date.month:
-        time_history = {}
-        day_record = curr_date
         
     all_data = sum(msg.values(), [])
     
@@ -63,7 +53,7 @@ def loop_once(msg, time_history, day_record, time_zone):
         if curr_device not in device_list:
             print('No corresponding account with IMEI: ' + tmp.get('device_id'))
             continue
-        process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_device)
+        process_each_data(tmp, df, time_zone, each, curr_device)
 
 def send_iot_payload(tmp, eui, curr_device):
     data_iot = {
@@ -78,12 +68,6 @@ def send_iot_payload(tmp, eui, curr_device):
                         "type": "temp",
                         "unit": "f",
                         "name": "Wright Gatekeeper"
-                    },
-                    {
-                        "channel":2,
-                        "value":time_history[curr_device][2],
-                        "type": "counter",
-                        "name": "Daily_Count"
                     }
                 ]        
             }
@@ -92,76 +76,7 @@ def send_iot_payload(tmp, eui, curr_device):
     print(r, data_iot)
 
 
-def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_device):
-    
-    interval = 8000
-    if math.isnan(df['interval'][curr_device]):
-        interval = 8000
-    else:
-        interval = df['interval'][curr_device]*1000
-        
-    if os.path.exists('temp.jpg'):
-        os.remove('temp.jpg')
-
-    request.urlretrieve(tmp.get('face_url'), 'temp.jpg')
-    
-    if tmp.get('mask') == 1:
-        if curr_device not in time_history:
-            time_history[curr_device] = [None, each.timestamp, 1]
-        else:
-            if each.timestamp - time_history[curr_device][1]>interval:
-                time_history[curr_device] = [None, each.timestamp, time_history[curr_device][2]+1]
-            else:
-                return
-                
-        
-    else:
-        if curr_device not in time_history:
-            print('not in time history')
-            request.urlretrieve(tmp.get('face_url'), 'temp.jpg')
-            tmp_o = load_image_file('temp.jpg');
-            tmp_e = face_encodings(tmp_o);
-            if tmp_e != []:
-                time_history[curr_device] = [tmp_e[0], each.timestamp, 1]
-                result = True
-            else:
-                return
-        else:
-            print('in time history')
-            if each.timestamp - time_history[curr_device][1]>interval:
-                request.urlretrieve(tmp.get('face_url'), 'temp.jpg')
-                tmp_o = load_image_file('temp.jpg');
-                tmp_e = face_encodings(tmp_o);
-                count = time_history[curr_device][2]
-                if tmp_e != []:
-                    time_history[curr_device] = [tmp_e[0], each.timestamp, count+1]
-                    result = True
-                else:
-                    return
-            else:    
-                prev_e = time_history[curr_device][0]
-                request.urlretrieve(tmp.get('face_url'), 'temp.jpg')
-                now = load_image_file('temp.jpg');
-                now_e = face_encodings(now);
-                if now_e == []:
-                    return
-                try:
-                    result = compare_faces([prev_e], now_e[0])[0];
-                    result = bool(result)
-                    print(result)
-                except:
-                    print(len(now_e),len(prev_e))
-                    print('exception')
-                    result = True
-                
-                if result == True:
-                    print('result ok', time_history[curr_device][2])
-                    time_history[curr_device][1] = each.timestamp
-                    return
-                else:
-                    count = time_history[curr_device][2]+1
-                    print('result not ok', time_history[curr_device][2])
-                    time_history[curr_device] = [now_e[0], each.timestamp, count]
+def process_each_data(tmp, df, time_zone, each, curr_device):
 
     if tmp.get('f_temperature') < config.lower_bound or tmp.get('f_temperature') > config.upper_bound:
         return
@@ -197,8 +112,10 @@ def process_each_data(tmp, df, time_history, day_record, time_zone, each, curr_d
             contacts.append([int(contact3),name3])
         if tmp.get('mask') == 1:
             substring = 'with mask'
-        else:
+        elif tmp.get('mask') == 2:
             substring = 'without mask'
+        elif tmp.get('mask') == 0:
+            substring = ''
         for contact in contacts:
             dt_now = datetime.now()-dt.timedelta(hours=time_zone[tz])
             if tmp.get('name') == '':
@@ -217,16 +134,15 @@ if __name__ == "__main__":
     topics = list(consumer.topics())
     valid_topics = [topic for topic in topics if topic[:13]=='detect_record']
     consumer.subscribe(valid_topics)
-    day_record = datetime.now()-dt.timedelta(hours = 8)
     time_zone = {'Pacific':8, 'Mountain':7, 'Central':6, 'Eastern':5}
     print (consumer.subscription())
     print (consumer.assignment())
 
     init()
-    time_history = {}
+
     while True:
         msg = consumer.poll(timeout_ms=1000) 
         if not bool(msg):
             time.sleep(1)
             continue
-        loop_once(msg, time_history, day_record, time_zone)
+        loop_once(msg, time_zone)
