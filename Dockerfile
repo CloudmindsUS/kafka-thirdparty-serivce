@@ -1,17 +1,18 @@
 # set base image (host OS)
-FROM python:3.6
-MAINTAINER xin.li<xin.li@cloudminds.com>
+FROM python:3.6-slim-stretch
 
 # set the working directory in the container
-WORKDIR /test
+WORKDIR /service
 
 # copy the dependencies file to the working directory
 COPY requirements.txt .
 
 # install dependencies
 RUN apt-get update -y \
-    && apt install -y vim \
-    && pip install -r requirements.txt
+    && apt-get install -y build-essential default-libmysqlclient-dev vim \
+    && pip install -r requirements.txt \
+    && apt-get autoremove -y && apt-get autoclean -y \
+    && rm -rf /usr/local/src/*
 
 # copy the content of the local src directory to the working directory
 COPY ./ .
