@@ -128,7 +128,7 @@ if __name__ == "__main__":
     print (consumer.subscription())
     print (consumer.assignment())
 
-    init()
+    # init()
 
     while True:
         msg = consumer.poll(timeout_ms=1000) 
