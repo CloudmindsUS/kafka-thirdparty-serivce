@@ -88,13 +88,7 @@ def process_each_data(tmp, df, time_zone, each, curr_device):
     if eui != '0' and eui != 0:
         send_iot_payload(tmp, eui, curr_device)
 
-    auth_df = pd.read_sql_table('auth',config.mysql_conf)
-    sid = auth_df['sid'][0]
-    token = auth_df['token'][0]
-    phone = auth_df['phone'][0]
-
-    client = Client(sid, token)
-
+    client = Client(config.account_sid, config.auth_token)
 
     if tmp.get('f_temperature') > thres:
         contacts = []
@@ -126,7 +120,7 @@ def process_each_data(tmp, df, time_zone, each, curr_device):
             else:
                 msg_body = 'Hi, ' + tmp.get('name') + ' has a High Temperature of ' + str(tmp.get('f_temperature')) + ' F ' + substring + ' at ' + datetime.strftime(dt_now, '%Y-%m-%d %H:%M:%S') + '. Device ID: ' + tmp.get('device_id')
             
-            message = client.messages.create(body=msg_body, from_=phone, to='+1'+str(contact[0]))
+            message = client.messages.create(body=msg_body, from_=config.account_ph, to='+1'+str(contact[0]))
             print(message.sid, contact, msg_body)
 
 if __name__ == "__main__":
