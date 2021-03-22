@@ -92,6 +92,9 @@ def process_each_data(tmp, df, time_zone, each, curr_device):
     sid = auth_df['sid'][0]
     token = auth_df['token'][0]
     phone = auth_df['phone'][0]
+    
+    checkin_url = auth_df['url'][0]
+    param = {'deviceID': int(tmp.get('device_id'))}
 
     client = Client(sid, token)
 
@@ -117,6 +120,27 @@ def process_each_data(tmp, df, time_zone, each, curr_device):
             substring = 'without mask'
         elif tmp.get('mask') == 0:
             substring = ''
+            
+        r = None
+        try:
+            r = requests.get(checkin_url,param).json()
+        except:
+            print('Check in checkout failed')
+        
+        try:
+            if r is not None and r['data'] != '':
+                if abs(datetime.timestamp(datetime.now())-int(r['time'])) < 10:
+                    for contact in contacts:
+                        dt_now = datetime.now() - dt.timedelta(hours=time_zone[tz])
+                        msg_body = 'Hi, ' + r['data'] + ' has a High Temperature of ' + str(tmp.get('f_temperature')) + ' F ' + substring + ' at ' + datetime.strftime(dt_now, '%Y-%m-%d %H:%M:%S') + '. Device ID: ' + tmp.get('device_id')
+            
+                        message = client.messages.create(body=msg_body, from_=phone, to='+1'+str(contact[0]))
+                        print(message.sid, contact, msg_body)
+                    continue
+                else:
+                    print('Time too long', abs(datetime.timestamp(datetime.now())-int(r['time'])))
+        except:
+            print('Data error')
         
         for contact in contacts:
             dt_now = datetime.now() - dt.timedelta(hours=time_zone[tz])
@@ -134,7 +158,7 @@ if __name__ == "__main__":
     topics = list(consumer.topics())
     valid_topics = [topic for topic in topics if topic[:13]=='detect_record']
     consumer.subscribe(valid_topics)
-    time_zone = {'America/Midway':11, 'America/Honolulu':10, 'America/Los_Angeles':8, 'America/Phoenix':7, 'America/Denver': 7, 'America/Chicago':6, 'America/New_York':5}
+    time_zone = {'America/Midway':11, 'America/Honolulu':10, 'America/Los_Angeles':7, 'America/Phoenix':7, 'America/Denver': 6, 'America/Chicago':5, 'America/New_York':4}
     print (consumer.subscription())
     print (consumer.assignment())
 
