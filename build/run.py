@@ -136,7 +136,7 @@ def process_each_data(tmp, df, time_zone, each, curr_device):
             
                         message = client.messages.create(body=msg_body, from_=phone, to='+1'+str(contact[0]))
                         print(message.sid, contact, msg_body)
-                    continue
+                    
                 else:
                     print('Time too long', abs(datetime.timestamp(datetime.now())-int(r['time'])))
         except:
