@@ -25,7 +25,7 @@ def init():
     engine = create_engine(config.mysql_conf, echo=False)
     if not database_exists(engine.url):
         create_database(engine.url)
-    df = pd.read_csv('database.csv', delimiter=',', skiprows=1, names=['Device_Name', 'IMEI', 'Device_ID', 'Name1', 'contact1', 'Name2', 'contact2', 'Name3', 'contact3'])
+    df = pd.read_csv('database.csv', delimiter=',', skiprows=1, names=['Device_Name', 'IMEI', 'Device_ID', 'Name', 'Contact'])
     df.to_sql('infos', if_exists='replace', con=engine)
     print(df)
     
@@ -100,20 +100,14 @@ def process_each_data(tmp, df, time_zone, each, curr_device):
 
 
     if tmp.get('f_temperature') > thres:
-        contacts = []
-        name1 = df['Name1'][curr_device]
-        name2 = df['Name2'][curr_device]
-        name3 = df['Name3'][curr_device]
-        contact1 = df['contact1'][curr_device]
-        contact2 = df['contact2'][curr_device]
-        contact3 = df['contact3'][curr_device]
         
-        if contact1 is not None and math.isnan(contact1) is False:
-            contacts.append([int(contact1), name1])
-        if contact2 is not None and math.isnan(contact2) is False:
-            contacts.append([int(contact2), name2])
-        if contact3 is not None and math.isnan(contact3) is False:
-            contacts.append([int(contact3), name3])
+        name_str = df['Name'][curr_device]
+        contact_str = df['Contact'][curr_device]
+        if name_str is None or contact_str is None:
+            return
+        names = name_str.split(',')
+        contacts = contact_str.split(',')
+        
         if tmp.get('mask') == 1:
             substring = 'with mask'
         elif tmp.get('mask') == 2:
@@ -129,12 +123,13 @@ def process_each_data(tmp, df, time_zone, each, curr_device):
         
         try:
             if r is not None and r['data'] != '':
+                print('CheckMe Message')
                 if abs(datetime.timestamp(datetime.now())-int(r['time'])) < 10:
                     for contact in contacts:
                         dt_now = datetime.now() - dt.timedelta(hours=time_zone[tz])
                         msg_body = 'Hi, ' + r['data'] + ' has a High Temperature of ' + str(tmp.get('f_temperature')) + ' F ' + substring + ' at ' + datetime.strftime(dt_now, '%Y-%m-%d %H:%M:%S') + '. Device ID: ' + tmp.get('device_id')
             
-                        message = client.messages.create(body=msg_body, from_=phone, to='+1'+str(contact[0]))
+                        message = client.messages.create(body=msg_body, from_=phone, to='+1'+contact)
                         print(message.sid, contact, msg_body)
                     
                 else:
@@ -142,15 +137,17 @@ def process_each_data(tmp, df, time_zone, each, curr_device):
         except:
             print('Data error')
         
-        for contact in contacts:
+        for i, contact in enumerate(contacts):
+        
+            print('Normal Message')
             dt_now = datetime.now() - dt.timedelta(hours=time_zone[tz])
             
             if tmp.get('name') == '':
-                msg_body = 'Hi ' + contact[1] + ', Your Gatekeeper Device ending in ' + tmp.get('device_id')[-5:] + ' has detected a High Temperature of ' + str(tmp.get('f_temperature')) + ' F ' + substring + ' at ' + datetime.strftime(dt_now, '%Y-%m-%d %H:%M:%S') + '. Device ID: ' + tmp.get('device_id')
+                msg_body = 'Hi ' + names[i] + ', Your Gatekeeper Device ending in ' + tmp.get('device_id')[-5:] + ' has detected a High Temperature of ' + str(tmp.get('f_temperature')) + ' F ' + substring + ' at ' + datetime.strftime(dt_now, '%Y-%m-%d %H:%M:%S') + '. Device ID: ' + tmp.get('device_id')
             else:
                 msg_body = 'Hi, ' + tmp.get('name') + ' has a High Temperature of ' + str(tmp.get('f_temperature')) + ' F ' + substring + ' at ' + datetime.strftime(dt_now, '%Y-%m-%d %H:%M:%S') + '. Device ID: ' + tmp.get('device_id')
             
-            message = client.messages.create(body=msg_body, from_=phone, to='+1'+str(contact[0]))
+            message = client.messages.create(body=msg_body, from_=phone, to='+1'+contact)
             print(message.sid, contact, msg_body)
 
 if __name__ == "__main__":

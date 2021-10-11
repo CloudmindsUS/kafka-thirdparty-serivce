@@ -1,1 +1,2 @@
-﻿Device_Name,IMEI,Device_ID,Name1,contact1,Name2,contact2,Name3,contact3
+﻿Device_Name,IMEI,Device_ID,Name,Contact
+Test,8628,0,"Ralph,Chris","1111,2222"
